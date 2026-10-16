@@ -71,6 +71,7 @@ def build_ru():
     body_main = re.sub(r">([^<>]+)<", ru_text, body_main)
     body_main = re.sub(r'(alt|aria-label)="([^"]+)"', ru_attr, body_main)
     body_main = body_main.replace('src="img/', 'src="/img/')
+    body_main = body_main.replace('<a class="lang" href="/ru/" hreflang="ru" lang="ru" title="Русская версия"', '<a class="lang" href="/" hreflang="uk" lang="uk" title="Українська версія"').replace('>RU</a>', '>UA</a>', 1)
     # "засматриваются" is longer than "задивляються": smaller hero heading
     body_main = body_main.replace("font-size: clamp(52px, 7.2vw, 104px)", "font-size: clamp(42px, 5.8vw, 86px)", 1)
     body_main = body_main.replace('<span lang="ru">', '<span lang="uk">', 1)
@@ -101,7 +102,8 @@ def build_ru():
         {"@type": "Question", "name": q.strip(), "acceptedAnswer": {"@type": "Answer", "text": re.sub("<[^>]+>", "", a).strip()}} for q, a in faqs]}
     new_ld = "".join('<script type="application/ld+json">\n%s\n</script>\n' % json.dumps(x, ensure_ascii=False) for x in (biz, faq))
     head = re.sub(r'(<script type="application/ld\+json">\n.*?\n</script>\n?)+', lambda m: new_ld, head, count=1, flags=re.S)
-    head = head.replace("</title>", "</title>\n" + HREFLANG, 1)
+    if "hreflang=" not in head:
+        head = head.replace("</title>", "</title>\n" + HREFLANG, 1)
     out = head + "<body>" + body
     # untranslated Ukrainian check
     left = [t.strip() for t in re.findall(r">([^<>]+)<", body_main) if re.search("[ІіЇїЄєҐґ]", t)]
